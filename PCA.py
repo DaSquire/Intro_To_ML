@@ -27,18 +27,18 @@ X=df.drop('diagnosis_result', axis=1).to_numpy()
 N,M = X.shape
 
 Xc = (X - np.mean(X, axis=0)) / np.std(X, axis=0)
-U,S,V = linalg.svd(Xc,full_matrices=False)  
-V = V.T
+U,S,Vh = linalg.svd(Xc,full_matrices=False)  
+V = Vh.T
 Z = Xc @ V
 rho = (S*S) / (S*S).sum()
 #%%
 fig = figure()
 ax = fig.add_subplot(1, 1, 1)
 ax.plot(rho,'o-')
-ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0, 0))
+plot(np.cumsum(rho),'x-', color='g')
 xticks(np.arange(len(rho)), np.arange(1, len(rho)+1))
 xlabel('Principal component')
-ylabel('Variance not explained')
+ylabel('Variance explained')
 
 palette = {
     'Benign': 'tab:green',
@@ -83,21 +83,25 @@ savefig('../latex/images/sizeError.pdf')
 
 #%%
 Xnc = np.delete(Xc, 2, axis=1)
-U,S,V = linalg.svd(Xnc,full_matrices=False)  
-V = V.T
-Z = Xnc @ V
-rho = (S*S) / (S*S).sum()
+U,S,Vn = linalg.svd(Xnc,full_matrices=False)  
+Vn = Vn.T
+Z = Xnc @ Vn
+rho2 = (S*S) / (S*S).sum()
 
 #%%
 fig = figure()
 ax = fig.add_subplot(1, 1, 1)
-ax.plot(rho,'o-')
-ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0, 0))
+ax.plot(rho2,'o-')
 xticks(np.arange(len(rho)), np.arange(1, len(rho)+1))
 xlabel('Principal component')
-ylabel('Variance not explained')
+ylabel('Variance explained')
+savefig('../latex/images/pca2var.pdf')
 
 
+#%%
+c = Vn[6,1]
+sns.relplot(x=Z[:,1], y=Xnc[:,6])
+plot([-3, 3], [-3*c, 3*c], color='b', alpha=0.5)
 #%%
 # sns.pairplot(df, hue='diagnosis_result')
 # title('Size over perimeter')
