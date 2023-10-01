@@ -129,7 +129,16 @@ for i in range(8):
         b = ax.bar(0, rho[i], width=0.2, bottom=totVar[i], color='C3', alpha=np.exp(-i/7))
 ax.legend()
 ax.set_xlim(left=0, right=0.22)
+savefig('../650de7553e6e3f99dbc97883/images/varBar.pdf', bbox_inches="tight")
 
+#%%
+
+
+
+
+
+
+#%%
 
 '''three_d = plot()
 plot_axes = three_d.axes(projection='3d')
