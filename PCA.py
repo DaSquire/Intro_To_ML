@@ -9,7 +9,7 @@ Created on Mon Sep 18 19:04:13 2023
 import pandas as pd
 import numpy as np
 import scipy.linalg as linalg
-from matplotlib.pyplot import (figure, subplot, plot, xlabel, ylabel, title, 
+from matplotlib.pyplot import (figure, axes, subplot, plot, xlabel, ylabel, title, 
 yticks, show,legend,imshow, cm, scatter, xticks, savefig)
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.ticker as mtick
@@ -91,11 +91,12 @@ rho2 = (S*S) / (S*S).sum()
 #%%
 fig = figure()
 ax = fig.add_subplot(1, 1, 1)
-ax.plot(rho2,'o-')
+ax.plot(np.cumsum(rho2),'o-')
 xticks(np.arange(len(rho)), np.arange(1, len(rho)+1))
 xlabel('Principal component')
 ylabel('Variance explained')
 savefig('../latex/images/pca2var.pdf')
+savefig('../650de7553e6e3f99dbc97883/images/pca2var.pdf')
 
 
 #%%
@@ -103,10 +104,25 @@ c = Vn[6,1]
 sns.relplot(x=Z[:,1], y=Xnc[:,6])
 plot([-3, 3], [-3*c, 3*c], color='b', alpha=0.5)
 #%%
+
+MM = np.empty([8,8])
+
+for i in range(8):
+    for j in range(8):
+        MM[i,j] = (V[i,:]/V[j,:]).var()
 # sns.pairplot(df, hue='diagnosis_result')
 # title('Size over perimeter')
+#%%
+totVar = np.append(0, np.cumsum(rho))
+fig, ax = (figure(figsize=[1.2, 4.8]), axes())
+ax.get_xaxis().set_visible(False)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+for i in range(8):
+    b = ax.bar(0, rho[i], bottom=totVar[i])
+    ax.bar_label(b, )
 
-Xr = np.stack((np.ones(100),(X[:,2])**2), axis=1)
 
 '''three_d = plot()
 plot_axes = three_d.axes(projection='3d')
