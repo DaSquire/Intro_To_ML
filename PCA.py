@@ -114,14 +114,21 @@ for i in range(8):
 # title('Size over perimeter')
 #%%
 totVar = np.append(0, np.cumsum(rho))
-fig, ax = (figure(figsize=[1.2, 4.8]), axes())
+fig, ax = (figure(figsize=[3, 4.8]), axes())
 ax.get_xaxis().set_visible(False)
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 ax.spines['bottom'].set_visible(False)
+ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
 for i in range(8):
-    b = ax.bar(0, rho[i], bottom=totVar[i])
-    ax.bar_label(b, )
+    
+    if(i<5):
+        b = ax.bar(0, rho[i], width=0.2, bottom=totVar[i], label='PC'+str(i+1), color='C3', alpha=np.exp(-i/7))
+        ax.bar_label(b, fmt='{:.0%}', label_type='center')
+    else:
+        b = ax.bar(0, rho[i], width=0.2, bottom=totVar[i], color='C3', alpha=np.exp(-i/7))
+ax.legend()
+ax.set_xlim(left=0, right=0.22)
 
 
 '''three_d = plot()
