@@ -9,7 +9,7 @@ Created on Mon Sep 18 19:04:13 2023
 import pandas as pd
 import numpy as np
 import scipy.linalg as linalg
-from matplotlib.pyplot import (figure, axes, subplot, plot, xlabel, ylabel, title, 
+from matplotlib.pyplot import (figure, subplots, axes, subplot, plot, xlabel, ylabel, title, 
 yticks, show,legend,imshow, cm, scatter, xticks, savefig)
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.ticker as mtick
@@ -132,10 +132,30 @@ ax.set_xlim(left=0, right=0.22)
 savefig('../650de7553e6e3f99dbc97883/images/varBar.pdf', bbox_inches="tight")
 
 #%%
+def pcpie(ax, matrix, i, labels):
+    wedges, texts, autotexts = ax.pie(matrix[:,i], explode=explode, labels=labels, autopct='%.1f%%')
+    threshold = 7
+    for label, pct_label in zip(texts, autotexts):
+        pct_value = pct_label.get_text().rstrip('%')
+        if float(pct_value) < threshold:
+            label.set_text('')
+            pct_label.set_text('')
+Vsq=Vn**2
+q=0.017
+labels=list(map(lambda x:x.capitalize().replace('_', ' '), list(df.columns[1:4])+list(df.columns[5:])))
+explode=[q,q,q,q,q,q,q] 
+fig, (ax1, ax2, ax3) = (subplots(1,3))
+fig.set_figwidth(12)
 
+pcpie(ax1, Vsq, 0, labels)
+pcpie(ax2, Vsq, 1, labels)
+pcpie(ax3, Vsq, 2, labels)
 
-
-
+ax1.set_title('Principal component 1')
+ax2.set_title('Principal component 2')
+ax3.set_title('Principal component 3')
+ax3.legend(bbox_to_anchor=(1.05, 1))
+savefig('../650de7553e6e3f99dbc97883/images/pcaDistr.pdf', bbox_inches="tight")
 
 
 #%%
