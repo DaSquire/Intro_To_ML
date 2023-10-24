@@ -20,11 +20,13 @@ continuous_cols = ['radius',
                     'compactness', 
                     'symmetry', 
                     'fractal_dimension']
+
 df_means = df[continuous_cols].mean()
 
 df_std = df[continuous_cols].std()
 
 df[continuous_cols] = (df[continuous_cols] -  df_means) / df_std
 
+X = df.to_numpy()
 
-print(df)
+print(X)

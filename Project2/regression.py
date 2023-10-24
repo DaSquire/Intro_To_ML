@@ -27,4 +27,6 @@ df_std = df[continuous_cols].std()
 
 df[continuous_cols] = (df[continuous_cols] -  df_means) / df_std
 
+X = df.to_numpy() # df as a numpy array
+
 print(df)
