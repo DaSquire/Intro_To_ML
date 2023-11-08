@@ -152,7 +152,7 @@ def rlr_validate(X,y,lambdas,cvf=10):
         train_err_vs_lambda train error as function of lambda (vector)
         test_err_vs_lambda  test error as function of lambda (vector)
     '''
-    CV = model_selection.KFold(cvf, shuffle=True)
+    CV = model_selection.KFold(cvf, shuffle=True, random_state=100)
     M = X.shape[1]
     w = np.empty((M,cvf,len(lambdas)))
     train_error = np.empty((cvf,len(lambdas)))
@@ -176,7 +176,7 @@ def rlr_validate(X,y,lambdas,cvf=10):
         Xty = X_train.T @ y_train
         XtX = X_train.T @ X_train
         for l in range(0,len(lambdas)):
-            # Compute parameters for current value of lambda and current CV fold
+            # Compute parameters for curreTruent value of lambda and current CV fold
             # note: "linalg.lstsq(a,b)" is substitue for Matlab's left division operator "\"
             lambdaI = lambdas[l] * np.eye(M)
             lambdaI[0,0] = 0 # remove bias regularization
