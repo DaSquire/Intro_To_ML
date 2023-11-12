@@ -19,7 +19,7 @@ replace = {
     'B':-1,
     'M':1}
 
-df = pd.read_csv("Prostate_Cancer.csv", index_col="id")
+df = pd.read_csv("../../Prostate_Cancer.csv", index_col="id")
 ydf = df.diagnosis_result
 X = df.replace(replace).to_numpy()
 df = df.drop('diagnosis_result', axis=1)
