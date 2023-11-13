@@ -11,7 +11,7 @@ from sklearn import tree
 import pandas as pd
 from sklearn import model_selection
 from toolbox_02450 import rlr_validate
-from scipy.stats import beta
+from scipy.stats import beta, binom
 from matplotlib import pyplot as plt
 import matplotlib.patches as mpatches
 
@@ -29,7 +29,7 @@ X = (X - X.mean(axis=0))/X.std(axis=0)
 
 pars = np.rint(np.linspace(2, 12,10)).astype('int64')
 lambdas = np.logspace(-1, 2, 15)
-k1 = 2
+k1 = len(X)
 k2 = 10
 CV_outer = model_selection.KFold(k1, shuffle=True, random_state=33)
 CV_inner = model_selection.KFold(k2, shuffle=True, random_state=396555)
@@ -67,10 +67,10 @@ for i, (train_index, test_index) in enumerate(CV_outer.split(X, y)):
     n00_arr[i] = sum((y_test_predict_tree != y_test) & (y_test_predict_log != y_test))
     n01_arr[i] = sum((y_test_predict_tree == y_test) & (y_test_predict_log != y_test))
     n10_arr[i] = sum((y_test_predict_tree != y_test) & (y_test_predict_log == y_test))
-n11 = np.mean(n11_arr)
-n10 = np.mean(n10_arr)
-n01 = np.mean(n01_arr)
-n00 = np.mean(n00_arr)
+n11 = np.sum(n11_arr)
+n10 = np.sum(n10_arr)
+n01 = np.sum(n01_arr)
+n00 = np.sum(n00_arr)
 #%%
 n = len(y_train)
 theta_est = (n10-n01)/n
@@ -80,12 +80,13 @@ g = (-theta_est + 1)*(Q-1)/2
 lx = 50
 low = [0]*lx
 high = [0]*lx
-betas = np.logspace(-2, -0.3, lx)
+betas = np.logspace(-3, -0.4, lx)
 for i, alpha in enumerate(betas):
     lower = 2*beta.ppf(alpha/2, f, g) - 1
     low[i] = lower
     higher = 2*beta.ppf(1-alpha/2, f, g) - 1
     high[i] = higher
+p = 2*binom.cdf(min(n01, n10), n10+n01, 1/2)
 #%%
 fig = plt.figure(figsize=(6,4), dpi = 400)
 ax = fig.add_subplot(1, 1, 1)
@@ -106,3 +107,8 @@ green_patch = mpatches.Patch(color='green')
 plt.legend(handles=[green_patch, ax.lines[2], ax.lines[1]],\
            labels=['Confidence interval', 'Confidence interval bounds', 'Expected accuracy difference'],\
                loc='best')
+dire = '/home/piripuz/Università/Magistrale/mach_learning/Progetto/2/6537d0e3efd6b3805617a6ab/images/{0}'
+try:
+    plt.savefig(dire.format('confidence_interval'), bbox_inches='tight')
+except:
+    print("Directory {0} not found".format(dire))

@@ -11,6 +11,7 @@ from sklearn import tree
 import pandas as pd
 from sklearn import model_selection
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 
 replace = {
     'B':-1,
@@ -43,6 +44,7 @@ for i, (train_index, test_index) in enumerate(CV_outer.split(X, y)):
     y_test = y[test_index]
     y_train = y[train_index]
     error_inner = np.empty((k2, len(pars)))
+    error_train_inner = np.empty((k2, len(pars)))
     for j, (train_index_inner, test_index_inner) in enumerate(CV_inner.split(X_train, y_train)):
         X_test_inner = X[test_index_inner]
         X_train_inner = X[train_index_inner]
@@ -52,7 +54,9 @@ for i, (train_index, test_index) in enumerate(CV_outer.split(X, y)):
             tr = tree.DecisionTreeClassifier(min_samples_split=pars[p], random_state=452)
             tr.fit(X_train_inner, y_train_inner)
             y_test_predict_inner = tr.predict(X_test_inner)
+            y_train_predict_inner = tr.predict(X_train_inner)
             error_inner[j][p] = sum(y_test_predict_inner!=y_test_inner)/len(y_test_inner)
+            error_train_inner[j][p] = sum(y_train_predict_inner!=y_train_inner)/len(y_train_inner)
     mean_err = np.mean(error_inner, axis=0)
     best_pars[i] = pars[np.argmin(mean_err)]
     best_par = best_pars[i]
@@ -75,7 +79,7 @@ false_negative = np.mean(false_negativee)
 
 #%%
 
-fig, ax = plt.subplots(figsize=(8,8), dpi=400)
+fig, ax = plt.subplots(figsize=(10,8), dpi=400)
 plt.text(1, 0.75, format(false_positive, '.0%'), fontsize=50, horizontalalignment='center', verticalalignment='center', color=[1,0,0,0.5])
 plt.text(1, 0.25, format(true_negative, '.0%'), fontsize=50, horizontalalignment='center', verticalalignment='center', color=[0,1,0,0.5])
 plt.text(0, 0.75, format(true_positive, '.0%'), fontsize=50, horizontalalignment='center', verticalalignment='center', color=[0,1,0,0.5])
@@ -91,20 +95,39 @@ ax.spines['bottom'].set_color('none')
 plt.xticks([0, 1], ['Malignant', 'Benign'])
 plt.yticks([0.25, 0.75], [ 'Reported\n benign', 'Reported\n malignant'])
 
-# c = (np.array([[false_negative, true_negative],
-#                   [true_positive, false_positive]])*255).\
-#                         astype('int64')
+c = (np.array([[false_negative, true_negative],
+                  [true_positive, false_positive]])*255).\
+                        astype('int64')
 
-# z = np.zeros((2,2,3), dtype='int64')
-# z[:,:,0] = [[128, 51], [51, 128]]
-# z[:,:,1] = [[0, 102], [102, 0]]
-# z[:,:,2] = [[0, 0], [0, 0]]
-# c = np.insert(z, 3, c, axis=2)
-# plt.imshow(c)
-fig = plt.figure(figsize=(4,4),dpi=300)
+z = np.zeros((2,2,3), dtype='int64')
+z[:,:,0] = [[128, 51], [51, 128]]
+z[:,:,1] = [[0, 102], [102, 0]]
+z[:,:,2] = [[0, 0], [0, 0]]
+c = np.insert(z, 3, c, axis=2)
+plt.imshow(c)
+dire = '/home/piripuz/Università/Magistrale/mach_learning/Progetto/2/6537d0e3efd6b3805617a6ab/images/{0}'
+try:
+    plt.savefig(dire.format('confusion_tree'), bbox_inches='tight')
+except:
+    print("Directory {0} not found".format(dire))
+# fig = plt.figure(figsize=(4,4),dpi=300)
 # tree.plot_tree(best_tree, feature_names=list(df.columns),\
 #                class_names=['Benign', 'Malignant'], max_depth=1)
 # plt.savefig('Tree.png', bbox_inches='tight')
 #%%
-plt.plot(pars, mean_err, 'ro-')
-plt.legend(['Error in '])
+fig = plt.figure(figsize=(6,4),dpi=300)
+ax = fig.subplots(1,1)
+plt.yticks(np.arange(0, 0.5, 0.05))
+ax.yaxis.set_major_formatter(mtick.PercentFormatter(1, 0))
+ax.set_ylabel('Error')
+ax.set_xlabel('Max sample for splitting')
+fold = 1
+plt.plot(pars, error_inner[fold,:], 'ro-')
+plt.plot(pars, error_train_inner[fold,:], 'bo-')
+plt.legend([ 'Error on test data', 'Error on train data'])
+plt.savefig('Tree_par')
+dire = '/home/piripuz/Università/Magistrale/mach_learning/Progetto/2/6537d0e3efd6b3805617a6ab/images/{0}'
+try:
+    plt.savefig(dire.format('tree_par'))
+except:
+    print("Directory {0} not found".format(dire), bbox_inches='tight')
