@@ -28,7 +28,7 @@ X = X[:, 1:]
 X = (X - X.mean(axis=0))/X.std(axis=0)
 
 pars = np.rint(np.linspace(2, 12,10)).astype('int64')
-lambdas = np.linspace(0, 100, 11)
+lambdas = np.logspace(-1, 2, 15)
 k1 = 2
 k2 = 10
 CV_outer = model_selection.KFold(k1, shuffle=True, random_state=33)
