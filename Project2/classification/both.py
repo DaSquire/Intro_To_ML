@@ -29,7 +29,7 @@ X = (X - X.mean(axis=0))/X.std(axis=0)
 
 pars = np.rint(np.linspace(2, 12,10)).astype('int64')
 lambdas = np.logspace(-1, 2, 15)
-k1 = len(X)
+k1 = 5# en(X)
 k2 = 10
 CV_outer = model_selection.KFold(k1, shuffle=True, random_state=33)
 CV_inner = model_selection.KFold(k2, shuffle=True, random_state=396555)
@@ -37,6 +37,11 @@ n11_arr = np.empty((k1,1))
 n10_arr = np.empty((k1,1))
 n01_arr = np.empty((k1,1))
 n00_arr = np.empty((k1,1))
+err_baseline = np.empty((k1, 1))
+err_log = np.empty((k1, 1))
+err_tree = np.empty((k1, 1))
+best_lambdas = np.empty((k1, 1))
+best_pars = np.empty((k1, 1), dtype='int64')
 
 for i, (train_index, test_index) in enumerate(CV_outer.split(X, y)):
     X_test = X[test_index]
@@ -44,6 +49,7 @@ for i, (train_index, test_index) in enumerate(CV_outer.split(X, y)):
     y_test = y[test_index]
     y_train = y[train_index]
     error_inner = np.empty((k2, len(pars)))
+    baseline = -1 if sum(y_train == -1) >= len(y_train)/2 else 1
     for j, (train_index_inner, test_index_inner) in enumerate(CV_inner.split(X_train, y_train)):
         X_test_inner = X[test_index_inner]
         X_train_inner = X[train_index_inner]
@@ -55,14 +61,20 @@ for i, (train_index, test_index) in enumerate(CV_outer.split(X, y)):
             y_test_predict_inner = tr.predict(X_test_inner)
             error_inner[j][p] = sum(y_test_predict_inner!=y_test_inner)/len(y_test_inner)
         mean_err = np.mean(error_inner, axis=0)
-        best_par = pars[np.argmin(mean_err)]
-    best_tree = tree.DecisionTreeClassifier(min_samples_leaf=best_par, random_state=12)
+        best_pars[i] = pars[np.argmin(mean_err)]
+    best_tree = tree.DecisionTreeClassifier(min_samples_leaf=best_pars[i,0], random_state=12)
     best_tree.fit(X, y)
-    err, l, _, _, _ = rlr_validate(X_train, y_train, lambdas, cvf=k2)
-    w = np.linalg.solve((X_train.T @ X_train + l*np.identity(X.shape[1])), X_train.T @ y_train)
+    err, best_lambdas[i], _, _, _ = rlr_validate(X_train, y_train, lambdas, cvf=k2)
+    w = np.linalg.solve((X_train.T @ X_train + best_lambdas[i]*np.identity(X.shape[1])), X_train.T @ y_train)
     y_test_predict_proba = 1/(1+np.exp(-(X_test @ w)))
     y_test_predict_log = (np.rint(y_test_predict_proba)-0.5)*2
     y_test_predict_tree = best_tree.predict(X_test)
+    y_test_predict_baseline = [baseline] * len(y_test)
+    
+    err_tree[i] = (y_test_predict_tree!=y_test).sum()/len(y_test)
+    err_log[i] = (y_test_predict_log!=y_test).sum()/len(y_test)
+    err_baseline[i] = (y_test_predict_baseline!=y_test).sum()/len(y_test)
+        
     n11_arr[i] = sum((y_test_predict_tree == y_test) & (y_test_predict_log == y_test))
     n00_arr[i] = sum((y_test_predict_tree != y_test) & (y_test_predict_log != y_test))
     n01_arr[i] = sum((y_test_predict_tree == y_test) & (y_test_predict_log != y_test))
